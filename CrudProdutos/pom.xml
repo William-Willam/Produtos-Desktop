@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  pom.xml = Project Object Model
+  É o "manual de instruções" do Maven. Ele define:
+  - quem é o projeto (groupId, artifactId, version)
+  - quais bibliotecas externas usar (dependencies)
+  - como compilar e rodar (build/plugins)
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <!-- Versão do formato do pom.xml. Sempre 4.0.0 no Maven moderno -->
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Identificação do seu projeto -->
+    <!-- groupId = "empresa/organização" (como um namespace) -->
+    <groupId>com.exemplo</groupId>
+
+    <!-- artifactId = nome do projeto/jar gerado -->
+    <artifactId>CrudProdutos</artifactId>
+
+    <!-- version = versão atual. SNAPSHOT = ainda em desenvolvimento -->
+    <version>1.0-SNAPSHOT</version>
+
+    <!-- Nome legível do projeto (só para exibição) -->
+    <name>CrudProdutos</name>
+
+    <!-- ====================================================
+         PROPERTIES — variáveis reutilizáveis no pom.xml
+         Use ${nome.da.variavel} para referenciar depois
+         ==================================================== -->
+    <properties>
+        <!-- Define que todos os arquivos .java usam UTF-8 (acentos funcionam) -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Versão do JUnit guardada como variável.
+             Usada em: ${junit.version} lá embaixo nas dependências -->
+        <junit.version>5.12.1</junit.version>
+    </properties>
+
+    <!-- ====================================================
+         DEPENDENCIES — bibliotecas externas que o projeto usa
+         O Maven baixa automaticamente do repositório central
+         ==================================================== -->
+    <dependencies>
+
+        <!-- JavaFX Controls: botões, tabelas, campos de texto, etc.
+             Sem isso, não existe TableView, Button, TextField... -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>21.0.6</version>
+        </dependency>
+
+        <!-- JavaFX FXML: permite carregar arquivos .fxml
+             Sem isso, o FXMLLoader não funciona -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>21.0.6</version>
+        </dependency>
+
+        <!-- JUnit: framework de testes automatizados
+             scope=test significa que só existe na hora de testar,
+             não vai junto no .jar final -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.version}</version> <!-- usa a variável definida acima -->
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Motor que executa os testes JUnit.
+             Precisa dos dois (api + engine) para funcionar -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Driver JDBC do MySQL — você adicionou aqui!
+             É a "ponte" entre o Java e o banco de dados MySQL.
+             Sem isso, DriverManager.getConnection() não acha o MySQL -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>8.3.0</version>
+        </dependency>
+
+    </dependencies>
+
+    <!-- ====================================================
+         BUILD — como o Maven compila e empacota o projeto
+         ==================================================== -->
+    <build>
+        <plugins>
+
+            <!-- Plugin do compilador Java
+                 Define qual versão do Java usar para compilar -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <!-- ⚠️ ATENÇÃO: source e target estão como 8 (Java 8)
+                         mas seu JDK é 21! Vamos corrigir isso agora -->
+                    <source>21</source>
+                    <target>21</target>
+                </configuration>
+            </plugin>
+
+            <!-- Plugin do JavaFX
+                 Permite rodar o app com: mvn javafx:run
+                 e gerar instaladores com jlink -->
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.8</version>
+                <executions>
+                    <execution>
+                        <id>default-cli</id>
+                        <configuration>
+                            <!-- Classe principal que inicia o app.
+                                 Formato: modulo/pacote.Classe
+                                 ⚠️ Vamos mudar de HelloApplication para Launcher -->
+                            <mainClass>
+                                com.exemplo.crudprodutos/com.exemplo.crudprodutos.Launcher
+                            </mainClass>
+
+                            <!-- Nome do executável gerado pelo jlink -->
+                            <launcher>app</launcher>
+
+                            <!-- Nome do .zip gerado com o app empacotado -->
+                            <jlinkZipName>app</jlinkZipName>
+
+                            <!-- Nome da pasta/imagem gerada pelo jlink -->
+                            <jlinkImageName>app</jlinkImageName>
+
+                            <!-- Remove páginas de manual do Linux do pacote final -->
+                            <noManPages>true</noManPages>
+
+                            <!-- Remove informações de debug do .jar (deixa menor) -->
+                            <stripDebug>true</stripDebug>
+
+                            <!-- Remove arquivos de cabeçalho C do pacote final -->
+                            <noHeaderFiles>true</noHeaderFiles>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+</project>
